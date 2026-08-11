@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="urlwarn.js" async></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подозрительная ссылка</title>
+    <style>
+        body {
+            position: relative;
+            font-family: Arial, sans-serif;
+            width: 300px;
+            background: #202020;
+            margin: 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            display: inline-block;
+            color: #ffffff00;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 18px;
+            color: white;
+            margin-bottom: 0px;
+        }
+        .color-info {
+            padding: 2px;
+        }
+        .hidden-menu {
+            position: absolute;
+            opacity: 0;
+            background-color: rgba(10, 10, 10, 0.98);
+            transition: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1), color 0.2s ease;
+            color: #fff;
+            width: 100%;
+            gap: 10px;  
+            height: 100%;
+            object-position: center;
+            cursor: pointer;
+            z-index: -1;
+            display: flex;
+            margin: 0px;
+        }
+        .checkbox {
+           z-index: -1;
+           background-color: #F0F0F0;
+           border: 2px solid #adb5bd;
+           border-radius: 50%; /* Делает чекбокс круглым */
+        }
+    </style>
+</head>
+<body>
+    Страница, на котороую вы хотите перейти, потенциально подозрительна.
+    <div>
+        
+    <button id="accept" style = "position: absolute; top: 4%; background-color: transparent; border: none; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 4px; cursor: pointer;">
+        Перейти ни смотря ни на что!
+    </button>
+    <button id="deny" style = "position: absolute; top: 20%; background-color: transparent; border: none; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; border-radius: 4px; cursor: pointer;">
+        Нет, что-то не хочу, давай обратно
+    </button>
+    </div>
+</body>
+</html>

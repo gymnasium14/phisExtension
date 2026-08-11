@@ -1,0 +1,45 @@
+{
+    "manifest_version": 3,
+    "name": "Phishing Detector",
+    "version": "1.0",
+    "description": "Detect phishing websites using ML.",
+    "permissions": ["activeTab", "tabs","scripting", "storage", "webNavigation"],
+    "host_permissions": ["<all_urls>"],
+    "background": {
+      "service_worker": "background.js",
+    "type": "module"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+      }
+    ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+    },
+    "action": {
+      "default_popup": "popup/popup.html",
+      "default_icon": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+      }
+    },
+    "web_accessible_resources": [{
+      "resources": ["scaler_params.json", "mlp_model.onnx",
+        "onnxruntime-web.wasm",
+        "warning-banner.html",
+        "ort-wasm-simd-threaded.jsep.mjs",
+        "ort-wasm-simd-threaded.wasm",
+        "ort-wasm-simd-threaded.jsep.wasm",
+        "ort-wasm-simd.jsep.mjs",
+        "ort-wasm-simd.wasm",
+        "ort-wasm-threaded.wasm",
+        "ort-wasm.jsep.mjs",
+        "ort-wasm.wasm",
+        "node_modules/onnxruntime-web/dist/*"],
+      "matches": ["<all_urls>"]
+    }]
+  }
+  

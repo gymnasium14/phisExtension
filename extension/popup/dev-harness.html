@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- dev-harness.html — страница для ручной проверки popup вне браузерного
+     расширения: подставляет заглушку chrome.* API с тестовым состоянием.
+     На работу расширения не влияет, в manifest не подключена. -->
+<html lang="ru">
+<head><meta charset="UTF-8"><title>PhishShield — dev harness</title></head>
+<body>
+<script>
+  // Тестовое состояние выбирается параметром ?verdict=safe|suspicious|dangerous
+  const verdict = new URLSearchParams(location.search).get('verdict') || 'safe';
+  const STATES = {
+    safe: {
+      state: 'displayed', verdict: 'safe', risk: 4, url: 'https://google.com',
+      host: 'google.com',
+      signals: [{ module: 'lists', icon: 'check', text: 'Домен в белом списке доверенных сайтов' }]
+    },
+    suspicious: {
+      state: 'displayed', verdict: 'suspicious', risk: 48, url: 'https://googgle.com',
+      host: 'googgle.com',
+      signals: [
+        { module: 'lists', icon: 'copy', text: 'Похож на домен google.com (возможен тайпсквоттинг)' },
+        { module: 'whois', icon: 'clock', text: 'Домен зарегистрирован 3 дн. назад' }
+      ]
+    },
+    dangerous: {
+      state: 'displayed', verdict: 'dangerous', risk: 87, url: 'https://googgle.com',
+      host: 'googgle.com',
+      signals: [
+        { module: 'lists', icon: 'copy', text: 'Похож на домен google.com (возможен тайпсквоттинг)' },
+        { module: 'text', icon: 'card', text: 'Обнаружены поля ввода банковской карты' },
+        { module: 'url', icon: 'ml', text: 'ML-модель: вероятность фишинга 82%' },
+        { module: 'whois', icon: 'clock', text: 'Домен зарегистрирован 3 дн. назад' }
+      ]
+    }
+  };
+
+  const settings = { protectionEnabled: true, skipPopular: true, dontWait: false, highAccuracy: true, theme: 'auto' };
+  const whitelist = ['belarusbank.by', 'gov.by', 'mail.google.com'];
+  const journal = [
+    { url: 'https://googgle.com', host: 'googgle.com', risk: 87, verdict: 'dangerous', ts: Date.now() - 36e5, reason: 'Похож на домен google.com' },
+    { url: 'https://google.com', host: 'google.com', risk: 4, verdict: 'safe', ts: Date.now() - 72e5, reason: 'Домен в белом списке' }
+  ];
+
+  globalThis.chrome = {
+    runtime: {
+      getManifest: () => ({ version: '1.0.0' }),
+      onMessage: { addListener() {} },
+      sendMessage: async (msg) => {
+        switch (msg.type) {
+          case 'GET_STATE': return { state: STATES[verdict] };
+          case 'GET_SETTINGS': return { settings };
+          case 'SET_SETTINGS': Object.assign(settings, msg.patch); return { ok: true, settings };
+          case 'GET_WHITELIST': return { domains: whitelist };
+          case 'ADD_WHITELIST':
+            if (!/^[a-zа-яё0-9-]+(\.[a-zа-яё0-9-]+)+$/i.test(msg.domain)) return { ok: false, error: 'Введите корректный домен' };
+            whitelist.unshift(msg.domain); return { ok: true, domains: whitelist };
+          case 'REMOVE_WHITELIST': return { ok: true, domains: whitelist.filter((d) => d !== msg.domain) };
+          case 'GET_JOURNAL': return { journal };
+          default: return { ok: true };
+        }
+      }
+    },
+    tabs: { query: async () => [{ id: 1, url: STATES[verdict].url }] }
+  };
+
+  // Загружаем настоящий popup.html внутрь этой страницы
+  fetch('popup.html').then((r) => r.text()).then((html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    document.head.append(...doc.head.querySelectorAll('link'));
+    for (const node of [...doc.body.children]) {
+      if (node.tagName !== 'SCRIPT') document.body.appendChild(node);
+    }
+    const s = document.createElement('script');
+    s.src = 'popup.js';
+    document.body.appendChild(s);
+  });
+</script>
+</body>
+</html>
